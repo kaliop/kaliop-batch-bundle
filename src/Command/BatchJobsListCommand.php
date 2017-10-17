@@ -5,12 +5,11 @@ namespace Kaliop\BatchBundle\Command;
 
 
 use Kaliop\BatchBundle\DependencyInjection\Compiler\RegisterJobsPass;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class BatchJobsListCommand extends ContainerAwareCommand
+class BatchJobsListCommand extends AbstractCommand
 {
     /**
      * Command configuration
@@ -30,7 +29,7 @@ class BatchJobsListCommand extends ContainerAwareCommand
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $registry = $this->getContainer()
+        $registry = $this->container
             ->get(RegisterJobsPass::REGISTRY_ID);
 
         $rows = [];

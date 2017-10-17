@@ -5,6 +5,7 @@ namespace Kaliop\BatchBundle;
 
 
 use Kaliop\BatchBundle\DependencyInjection\Compiler\RegisterJobsPass;
+use Kaliop\BatchBundle\DependencyInjection\Compiler\SetContainerPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 

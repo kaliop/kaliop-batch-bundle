@@ -3,8 +3,24 @@ services:
   _defaults:
     autowire: true
 
-  Kaliop\BatchBundle\Command\BatchCommand:
-    tags:
-      - { name: 'monolog.logger', channel: 'batch' }
+  batch.handler:
+    class: 'Monolog\Handler\RotatingFileHandler'
+    arguments:
+      $filename: '%kernel.logs_dir%/kaliop_batch.log'
+      $maxFiles: 10
+      $level: 300
 
-  Kaliop\BatchBundle\Batch\Writer\EntityWriter: ~
+  batch.logger:
+    class: 'Monolog\Logger'
+    arguments:
+      $name: 'kaliop_batch'
+      $handlers:
+        - '@batch.handler'
+
+  batch.command:
+    class: 'Kaliop\BatchBundle\Command\BatchCommand'
+    tag:
+      - { name: 'console.command' }
+
+  batch.entity_writer:
+    class: 'Kaliop\BatchBundle\Batch\Writer\EntityWriter'

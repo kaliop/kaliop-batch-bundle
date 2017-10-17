@@ -6,13 +6,12 @@ namespace Kaliop\BatchBundle\Command;
 
 use Kaliop\BatchBundle\Batch\Job\JobExecution;
 use Kaliop\BatchBundle\DependencyInjection\Compiler\RegisterJobsPass;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class BatchCommand extends ContainerAwareCommand
+class BatchCommand extends AbstractCommand
 {
     const EXIT_SUCCESS_CODE = 0;
     const EXIT_ERROR_CODE = 1;
@@ -28,7 +27,8 @@ class BatchCommand extends ContainerAwareCommand
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $logger = $this->getContainer()->get('monolog.logger.batch');
+        $container = $this->getApplication()->getKernel()->getContainer();
+        $logger = $container->get('batch.logger');
         $style = new OutputFormatterStyle('yellow', 'black');
         $output->getFormatter()->setStyle('warning', $style);
 
@@ -39,7 +39,7 @@ class BatchCommand extends ContainerAwareCommand
         ]);
 
         try {
-            $jobInstance = $this->getContainer()
+            $jobInstance = $container
                 ->get(RegisterJobsPass::REGISTRY_ID)
                 ->get($jobCode);
             if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {

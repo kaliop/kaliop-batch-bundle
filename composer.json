@@ -14,19 +14,19 @@
   "require": {
     "symfony/http-kernel": "^3.3.10",
     "symfony/validator": "^3.3.10",
-    "symfony/event-dispatcher": "^3.3.10",
     "symfony/console": "^3.3.10",
     "symfony/options-resolver": "^3.3.10",
-    "psr/log": "^1.0.2",
     "symfony/doctrine-bridge": "^3.3.10",
-    "doctrine/dbal": "^2.6.2",
+    "doctrine/doctrine-bundle": "^1.7.1",
+    "doctrine/orm": "^2.5.11",
     "symfony/filesystem": "^3.3.10",
     "symfony/finder": "^3.3.10",
     "symfony/dependency-injection": "^3.3.10",
-    "symfony/config": "^3.3.10"
+    "symfony/config": "^3.3.10",
+    "monolog/monolog": "1.23.0"
   },
   "autoload": {
-    "psr-4": { "Kaliop\\": "src" }
+    "psr-4": { "Kaliop\\BatchBundle\\": "src" }
   },
   "minimum-stability": "stable",
   "extra": {
