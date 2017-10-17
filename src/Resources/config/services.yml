@@ -1,0 +1,10 @@
+services:
+
+  _defaults:
+    autowire: true
+
+  Kaliop\BatchBundle\Command\BatchCommand:
+    tags:
+      - { name: 'monolog.logger', channel: 'batch' }
+
+  Kaliop\BatchBundle\Batch\Writer\EntityWriter: ~
