@@ -29,7 +29,7 @@ class CsvFileIterator
      * CsvFileIterator constructor.
      * @param array $options
      */
-    public function __construct(array $options)
+    public function __construct(array $options, int $offset)
     {
         $options = $this->resolveOptions($options);
         $this->filepath = $options['filepath'];
@@ -40,6 +40,7 @@ class CsvFileIterator
         $this->splFileObject->setFlags(\SplFileObject::READ_CSV);
 
         $this->headers = $this->splFileObject->fgetcsv($this->delimiter, $this->enclosure);
+        $this->forward($offset);
     }
 
     /**
@@ -48,6 +49,16 @@ class CsvFileIterator
     public function getHeaders()
     {
         return $this->headers;
+    }
+
+    /**
+     * @param int $offset
+     */
+    public function forward(int $offset)
+    {
+        for ($i=0; $i<$offset; $i++) {
+            $this->splFileObject->fgetcsv($this->delimiter, $this->enclosure);
+        }
     }
 
     /**

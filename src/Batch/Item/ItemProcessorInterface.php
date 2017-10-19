@@ -9,5 +9,5 @@ namespace Kaliop\BatchBundle\Batch\Item;
  */
 interface ItemProcessorInterface
 {
-    public function process(&$item);
+    public function process($item);
 }

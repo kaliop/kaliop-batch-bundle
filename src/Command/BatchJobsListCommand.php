@@ -29,7 +29,9 @@ class BatchJobsListCommand extends AbstractCommand
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $registry = $this->container
+        $registry = $this->getApplication()
+            ->getKernel()
+            ->getContainer()
             ->get(RegisterJobsPass::REGISTRY_ID);
 
         $rows = [];

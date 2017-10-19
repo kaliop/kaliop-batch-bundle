@@ -9,5 +9,5 @@ namespace Kaliop\BatchBundle\Batch\Item;
  */
 interface ItemReaderInterface
 {
-    public function read();
+    public function read(int $offset);
 }

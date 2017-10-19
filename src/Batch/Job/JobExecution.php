@@ -16,6 +16,7 @@ class JobExecution
     const STAT_SUCCESS = 'success';
     const STAT_WARNINGS = 'warnings';
     const STAT_FAILURES = 'failures';
+    const STAT_FINISHED = 'finished';
 
     /** @var array */
     protected $config;
@@ -40,6 +41,7 @@ class JobExecution
             self::STAT_SUCCESS => 0,
             self::STAT_WARNINGS => 0,
             self::STAT_FAILURES => 0,
+            self::STAT_FINISHED => false,
         ];
     }
 
@@ -57,6 +59,14 @@ class JobExecution
     public function getCode() : string
     {
         return $this->config['code'];
+    }
+
+    /**
+     * @return int
+     */
+    public function getOffset() : int
+    {
+        return $this->config['offset'];
     }
 
     /**
@@ -131,6 +141,17 @@ class JobExecution
     }
 
     /**
+     * @param bool $finished
+     * @return JobExecution
+     */
+    public function setFinished(bool $finished) : JobExecution
+    {
+        $this->stats[self::STAT_FINISHED] = $finished;
+
+        return $this;
+    }
+
+    /**
      * @param string $key
      * @param int $n
      */
@@ -146,8 +167,8 @@ class JobExecution
     private function resolveConfiguration(array $config)
     {
         return (new OptionsResolver())
-            ->setRequired(['code', 'verbosity'])
-            ->setAllowedTypes('code', 'string')
+            ->setRequired(['code', 'verbosity', 'offset'])
+            ->setAllowedTypes('code', 'string', 'int')
             ->setAllowedValues('verbosity', [
                 OutputInterface::VERBOSITY_QUIET,
                 OutputInterface::VERBOSITY_NORMAL,

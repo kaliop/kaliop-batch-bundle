@@ -10,8 +10,6 @@ use Kaliop\BatchBundle\Batch\Item\ItemReaderInterface;
 use Kaliop\BatchBundle\Batch\Item\ItemWriterInterface;
 use Kaliop\BatchBundle\Batch\Job\JobExecution;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Console\Helper\ProgressBar;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -50,7 +48,7 @@ class ItemStep extends AbstractStep
         ItemReaderInterface $reader,
         ItemProcessorInterface $processor,
         ItemWriterInterface $writer,
-        $batchSize = 50
+        $batchSize = 200
     )
     {
         parent::__construct($eventDispatcher);
@@ -62,25 +60,19 @@ class ItemStep extends AbstractStep
         $this->batchSize = $batchSize;
     }
 
+    /**
+     * @param JobExecution $jobExecution
+     */
     protected function doExecute(JobExecution $jobExecution)
     {
         $itemsToWrite = [];
         $writeCount = 0;
 
-        if ($jobExecution->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-            $progress = new ProgressBar($jobExecution->getOutput());
-            $progress->setFormat('Items treated: %message% - Memory usage: %memory%');
-            $progress->start();
-        }
-
         $stopExecution = false;
         while (!$stopExecution) {
-            if ($jobExecution->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-                $this->updateProgress($jobExecution, $progress);
-            }
             try {
                 $jobExecution->incrementTotal();
-                $readItem = $this->reader->read();
+                $readItem = $this->reader->read($jobExecution->getOffset());
                 if (null === $readItem) {
                     $jobExecution->decrementTotal();
                     $stopExecution = true;
@@ -98,7 +90,7 @@ class ItemStep extends AbstractStep
                 $processedItem = null;
                 unset($processedItem);
                 $writeCount++;
-                if (0 === $writeCount % $this->batchSize) {
+                if ($this->isBatchSizeReached($writeCount)) {
                     try {
                         $this->writer->write($itemsToWrite);
                         $jobExecution->incrementSuccess(count($itemsToWrite));
@@ -106,30 +98,40 @@ class ItemStep extends AbstractStep
                         $this->handleException($e, $jobExecution);
                     } finally {
                         $itemsToWrite = [];
+                        $stopExecution = true;
                     }
                 }
             }
-        }
-
-        if ($jobExecution->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-            $this->updateProgress($jobExecution, $progress);
         }
         try {
             $n = count($itemsToWrite);
             if ($n > 0) {
                 $this->writer->write($itemsToWrite);
                 $jobExecution->incrementSuccess($n);
+                $jobExecution->setFinished(true);
             }
         } catch (\Exception $e) {
             $this->handleException($e, $jobExecution);
         }
-
-        if ($jobExecution->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
-            $progress->finish();
-            $jobExecution->getOutput()->writeln('');
-        }
     }
 
+    /**
+     * @param int $writeCount
+     * @return bool
+     */
+    protected function isBatchSizeReached(int $writeCount) : bool
+    {
+        if (!$this->batchSize) {
+            return false;
+        }
+
+        return 0 === $writeCount % $this->batchSize;
+    }
+
+    /**
+     * @param $e
+     * @param JobExecution $jobExecution
+     */
     protected function handleException($e, JobExecution $jobExecution)
     {
         $jobExecution->incrementFailures();
@@ -142,18 +144,5 @@ class ItemStep extends AbstractStep
         }
 
         $this->logger->error($e->getMessage());
-    }
-
-    protected function updateProgress(JobExecution $jobExecution, ProgressBar $progress)
-    {
-        $stats = $jobExecution->getStats();
-        $message = sprintf(
-            'Items treated: %s - Success: %s - Errors: %s',
-            $stats[JobExecution::STAT_TOTAL],
-            $stats[JobExecution::STAT_SUCCESS],
-            $stats[JobExecution::STAT_FAILURES]
-        );
-        $progress->setMessage($message);
-        $progress->advance();
     }
 }

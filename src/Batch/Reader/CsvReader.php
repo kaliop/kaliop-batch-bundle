@@ -37,13 +37,14 @@ class CsvReader implements ItemReaderInterface
     }
 
     /**
+     * @param int $offset
      * @return array|null
-     * @throws \Exception
+     * @throws InvalidItemException
      */
-    public function read()
+    public function read(int $offset)
     {
         if (null === $this->fileIterator) {
-            $this->fileIterator = new CsvFileIterator($this->options);
+            $this->fileIterator = new CsvFileIterator($this->options, $offset);
         }
 
         $data = $this->fileIterator->readLine();
