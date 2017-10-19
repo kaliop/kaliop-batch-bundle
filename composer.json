@@ -23,6 +23,7 @@
     "symfony/finder": "^3.3.10",
     "symfony/dependency-injection": "^3.3.10",
     "symfony/config": "^3.3.10",
+    "symfony/process": "^3.3.10",
     "monolog/monolog": "1.23.0"
   },
   "autoload": {
