@@ -49,7 +49,7 @@ class CsvReader implements ItemReaderInterface
 
         $data = $this->fileIterator->readLine();
 
-        if (false === $data) {
+        if (null === $data || false === $data) {
             return null;
         }
 

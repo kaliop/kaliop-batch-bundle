@@ -28,6 +28,7 @@ class CsvFileIterator
     /**
      * CsvFileIterator constructor.
      * @param array $options
+     * @param int $offset
      */
     public function __construct(array $options, int $offset)
     {
@@ -37,7 +38,8 @@ class CsvFileIterator
         $this->enclosure = $options['enclosure'];
 
         $this->splFileObject = new \SplFileObject($this->filepath);
-        $this->splFileObject->setFlags(\SplFileObject::READ_CSV);
+        // Read file as a CSV file and skip empty lines (especially at eof)
+        $this->splFileObject->setFlags(\SplFileObject::READ_CSV | \SplFileObject::SKIP_EMPTY);
 
         $this->headers = $this->splFileObject->fgetcsv($this->delimiter, $this->enclosure);
         $this->forward($offset);
