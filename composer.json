@@ -12,6 +12,7 @@
     }
   ],
   "require": {
+    "php": "^7.1.2",
     "symfony/http-kernel": "^3.3.10",
     "symfony/validator": "^3.3.10",
     "symfony/console": "^3.3.10",
