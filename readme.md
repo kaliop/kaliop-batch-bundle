@@ -15,7 +15,7 @@ $ php composer.phar config repositories.kaliopBatchBundle '{ "type": "vcs", "url
 ```
 ### Install library
 ```bash
-$ php composer.phar require kaliop/batch-bundle:dev-master
+$ php composer.phar require kaliop/batch-bundle
 ```
 ### Remove library
 ```bash
