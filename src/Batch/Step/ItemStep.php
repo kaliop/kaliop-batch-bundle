@@ -143,6 +143,6 @@ class ItemStep extends AbstractStep
             return;
         }
 
-        $this->logger->error($e->getMessage());
+        throw $e;
     }
 }
