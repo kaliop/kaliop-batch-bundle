@@ -4,12 +4,11 @@
 namespace Kaliop\BatchBundle\Command;
 
 
-use Kaliop\BatchBundle\DependencyInjection\Compiler\RegisterJobsPass;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class BatchJobsListCommand extends AbstractCommand
+class JobsListBatchCommand extends AbstractBatchCommand
 {
     /**
      * Command configuration
@@ -29,13 +28,8 @@ class BatchJobsListCommand extends AbstractCommand
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $registry = $this->getApplication()
-            ->getKernel()
-            ->getContainer()
-            ->get(RegisterJobsPass::REGISTRY_ID);
-
         $rows = [];
-        foreach ($registry->allByTypes() as $type => $jobs) {
+        foreach ($this->jobRegistry->allByTypes() as $type => $jobs) {
             foreach (array_keys($jobs) as $code) {
                 $rows[] = [$code, $type];
             }

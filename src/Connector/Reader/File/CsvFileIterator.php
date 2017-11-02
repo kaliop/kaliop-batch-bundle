@@ -64,6 +64,14 @@ class CsvFileIterator
     }
 
     /**
+     * Reset file cursor
+     */
+    public function rewind()
+    {
+        $this->splFileObject->rewind();
+    }
+
+    /**
      * Return the current element
      *
      * @return mixed Can return any type.

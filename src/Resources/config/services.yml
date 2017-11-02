@@ -8,7 +8,7 @@ services:
     arguments:
       $filename: '%kernel.logs_dir%/kaliop_batch.log'
       $maxFiles: 10
-      $level: 300
+      $level: 200
 
   batch.logger:
     class: 'Monolog\Logger'
@@ -17,9 +17,16 @@ services:
       $handlers:
         - '@batch.handler'
 
-  batch.command:
-    class: 'Kaliop\BatchBundle\Command\BatchCommand'
-    tag:
+  Kaliop\BatchBundle\Command\BatchCommand:
+    arguments:
+      $logger: '@batch.logger'
+    tags:
+      - { name: 'console.command' }
+
+  Kaliop\BatchBundle\Command\JobsListBatchCommand:
+    arguments:
+      $logger: '@batch.logger'
+    tags:
       - { name: 'console.command' }
 
   batch.entity_writer:

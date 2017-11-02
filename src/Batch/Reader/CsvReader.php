@@ -68,6 +68,13 @@ class CsvReader implements ItemReaderInterface
         return $item;
     }
 
+    public function rewind()
+    {
+        if ($this->fileIterator) {
+            $this->fileIterator->rewind();
+        }
+    }
+
     /**
      * @param array $options
      * @return array

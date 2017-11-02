@@ -25,9 +25,10 @@ class RegisterJobsPass implements CompilerPassInterface
     public function process(ContainerBuilder $container)
     {
         if (!$container->hasDefinition(self::REGISTRY_ID)) {
+            $definition = (new Definition('Kaliop\BatchBundle\Batch\Job\JobRegistry'))->setPublic(true);
             $container->setDefinition(
                 self::REGISTRY_ID,
-                new Definition('Kaliop\BatchBundle\Batch\Job\JobRegistry')
+                $definition
             );
         }
 

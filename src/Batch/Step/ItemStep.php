@@ -65,6 +65,7 @@ class ItemStep extends AbstractStep
      */
     protected function doExecute(JobExecution $jobExecution)
     {
+        $this->reader->rewind();
         $itemsToWrite = [];
         $writeCount = 0;
 

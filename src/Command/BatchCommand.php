@@ -12,7 +12,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class BatchCommand extends AbstractCommand
+class BatchCommand extends AbstractBatchCommand
 {
     const EXIT_SUCCESS_CODE = 0;
     const EXIT_ERROR_CODE = 1;
@@ -31,8 +31,6 @@ class BatchCommand extends AbstractCommand
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $container = $this->getApplication()->getKernel()->getContainer();
-        $logger = $container->get('batch.logger');
         $style = new OutputFormatterStyle('yellow', 'black');
         $output->getFormatter()->setStyle('warning', $style);
 
@@ -44,18 +42,15 @@ class BatchCommand extends AbstractCommand
         ]);
 
         try {
-            $jobInstance = $container
-                ->get(RegisterJobsPass::REGISTRY_ID)
-                ->get($jobCode);
-            if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
-                $output->writeln(sprintf('<info>Job "%s" started</info>', $jobCode));
-            }
+            $jobInstance = $this->jobRegistry->get($jobCode);
             $jobInstance->execute($jobExecution);
 
             $stats = $jobExecution->getStats();
 
-            $logger->info(sprintf(
-                'Total items: %d. Success: %d. Warnings: %d. Failures: %d',
+            $this->logger->info(sprintf(
+                '[%s %s] Total items: %d. Success: %d. Warnings: %d. Failures: %d',
+                $this->getName(),
+                $jobCode,
                 $stats[JobExecution::STAT_TOTAL],
                 $stats[JobExecution::STAT_SUCCESS],
                 $stats[JobExecution::STAT_WARNINGS],
@@ -75,12 +70,16 @@ class BatchCommand extends AbstractCommand
             return self::EXIT_SUCCESS_CODE;
 
         } catch (\Exception $e) {
-            $logger->error(sprintf(
-               '%s',
-               $e->getMessage()
-            ));
+            $message = sprintf(
+                'Exception code %s, file %s, line %s. Message was "%s"',
+                $e->getMessage(),
+                $e->getFile(),
+                $e->getLine(),
+                $e->getMessage()
+            );
 
-            $output->writeln(sprintf('<error>%s</error>', $e->getMessage()));
+            $this->logger->error($message);
+            echo $message;
 
             return self::EXIT_ERROR_CODE;
         }

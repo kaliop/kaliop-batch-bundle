@@ -4,6 +4,7 @@
 namespace Kaliop\BatchBundle\Batch\Job;
 
 
+use Kaliop\BatchBundle\Batch\Step\ItemStep;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
@@ -33,6 +34,7 @@ class Job implements JobInterface
      */
     final public function execute(JobExecution $jobExecution)
     {
+        /** @var ItemStep $step */
         foreach ($this->steps as $step) {
             $step->execute($jobExecution);
         }
