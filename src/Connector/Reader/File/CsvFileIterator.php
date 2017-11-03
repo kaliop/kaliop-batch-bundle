@@ -69,6 +69,8 @@ class CsvFileIterator
     public function rewind()
     {
         $this->splFileObject->rewind();
+        // Skip first line (csv headers) (splFileObject seek function doesn't work well)
+        $this->splFileObject->fgetcsv($this->delimiter, $this->enclosure);
     }
 
     /**
