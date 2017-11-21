@@ -28,7 +28,7 @@
     "monolog/monolog": "1.23.0"
   },
   "suggest": {
-    "kaliop/console-bundle": "^1.0"
+    "kaliop/lock-command-bundle": "^1.0"
   },
   "autoload": {
     "psr-4": { "Kaliop\\BatchBundle\\": "src" }
