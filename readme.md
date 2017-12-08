@@ -11,7 +11,7 @@ It is inspired by *Spring Batch*, and is a lighter implementation of it.
 
 ### Configure repository
 ```bash
-$ php composer.phar config repositories.kaliopBatchBundle '{ "type": "vcs", "url": "ssh://git@github.com:kaliop/kaliop-batch-bundle.git" }'
+$ php composer.phar config repositories.kaliopBatchBundle '{ "type": "vcs", "url": "https://github.com/kaliop/kaliop-batch-bundle.git" }'
 ```
 ### Install library
 ```bash
