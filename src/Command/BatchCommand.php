@@ -5,7 +5,7 @@ namespace Kaliop\BatchBundle\Command;
 
 
 use Kaliop\BatchBundle\Batch\Job\JobExecution;
-use Kaliop\BatchBundle\DependencyInjection\Compiler\RegisterJobsPass;
+use Kaliop\BatchBundle\Batch\Job\JobParameters;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -25,7 +25,8 @@ class BatchCommand extends AbstractBatchCommand
             ->setDescription('Launch a registered job instance')
             ->setHidden(true)
             ->addArgument('code', InputArgument::REQUIRED, 'Job code')
-            ->addOption('offset', 'o', InputOption::VALUE_OPTIONAL, null, 0)
+            ->addOption('config', null, InputOption::VALUE_REQUIRED, 'Job configuration parameters')
+            ->addOption('offset', 'o', InputOption::VALUE_REQUIRED, null, 0)
         ;
     }
 
@@ -34,15 +35,16 @@ class BatchCommand extends AbstractBatchCommand
         $style = new OutputFormatterStyle('yellow', 'black');
         $output->getFormatter()->setStyle('warning', $style);
 
-        $jobCode = $input->getArgument('code');
-        $jobExecution = new JobExecution($output, [
-            'code' => $jobCode,
-            'verbosity' => $output->getVerbosity(),
-            'offset' => $input->getOption('offset')
-        ]);
+        $jobParameters = new JobParameters();
+        $jobParameters->set('job_code', $input->getArgument('code'));
+        $jobParameters->set('verbosity', $output->getVerbosity());
+        $jobParameters->set('offset', $input->getOption('offset'));
+        $jobParameters->set('options', $input->getOption('config'));
+
+        $jobExecution = new JobExecution($output, $jobParameters);
 
         try {
-            $jobInstance = $this->jobRegistry->get($jobCode);
+            $jobInstance = $this->jobRegistry->get($jobParameters->get('job_code'));
             $jobInstance->execute($jobExecution);
 
             $stats = $jobExecution->getStats();
@@ -50,7 +52,7 @@ class BatchCommand extends AbstractBatchCommand
             $this->logger->info(sprintf(
                 '[%s %s] Total items: %d. Success: %d. Warnings: %d. Failures: %d',
                 $this->getName(),
-                $jobCode,
+                $jobParameters->get('job_code'),
                 $stats[JobExecution::STAT_TOTAL],
                 $stats[JobExecution::STAT_SUCCESS],
                 $stats[JobExecution::STAT_WARNINGS],

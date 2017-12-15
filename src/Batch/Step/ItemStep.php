@@ -73,7 +73,7 @@ class ItemStep extends AbstractStep
         while (!$stopExecution) {
             try {
                 $jobExecution->incrementTotal();
-                $readItem = $this->reader->read($jobExecution->getOffset());
+                $readItem = $this->reader->read($jobExecution);
                 if (null === $readItem) {
                     $jobExecution->decrementTotal();
                     $stopExecution = true;

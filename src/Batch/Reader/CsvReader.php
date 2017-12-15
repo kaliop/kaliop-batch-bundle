@@ -8,6 +8,7 @@ use Kaliop\BatchBundle\ArrayConverter\ArrayConverterInterface;
 use Kaliop\BatchBundle\Batch\Item\DataInvalidItem;
 use Kaliop\BatchBundle\Batch\Item\InvalidItemException;
 use Kaliop\BatchBundle\Batch\Item\ItemReaderInterface;
+use Kaliop\BatchBundle\Batch\Job\JobExecution;
 use Kaliop\BatchBundle\Connector\Reader\File\CsvFileIterator;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -37,14 +38,17 @@ class CsvReader implements ItemReaderInterface
     }
 
     /**
-     * @param int $offset
+     * @param \Kaliop\BatchBundle\Batch\Job\JobExecution $jobExecution
      * @return array|null
-     * @throws InvalidItemException
+     * @throws \Kaliop\BatchBundle\Batch\Item\InvalidItemException
      */
-    public function read(int $offset)
+    public function read(JobExecution $jobExecution)
     {
         if (null === $this->fileIterator) {
-            $this->fileIterator = new CsvFileIterator($this->options, $offset);
+            $jobParameters = $jobExecution->getJobParameters();
+            $options = $jobExecution->getJobParameters()->get('options');
+            $this->options = $this->resolveOptions(array_merge($this->options, $options));
+            $this->fileIterator = new CsvFileIterator($this->options, $jobParameters->get('offset'));
         }
 
         $data = $this->fileIterator->readLine();

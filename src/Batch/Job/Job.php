@@ -31,6 +31,7 @@ class Job implements JobInterface
 
     /**
      * Execute the job
+     * @param \Kaliop\BatchBundle\Batch\Job\JobExecution $jobExecution
      */
     final public function execute(JobExecution $jobExecution)
     {

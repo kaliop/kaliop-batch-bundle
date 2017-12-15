@@ -517,3 +517,10 @@ services:
   AppBundle\Batch\Processor\EmployeeProcessor: ~
   AppBundle\Batch\ArrayConverter\EmployeeConverter: ~
 ```
+
+#### Overriding the reader configured options in the command line
+
+It is possible to override the options for the reader in the command line, by passing one of more options in the --config option:
+```bash
+php bin/console kaliop:batch:launch job_code --config='{"filepath":"/path/to/the/file","delimiter":","}'
+```

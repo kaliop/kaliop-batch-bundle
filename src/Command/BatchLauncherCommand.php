@@ -8,6 +8,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
 
@@ -32,7 +33,9 @@ class BatchLauncherCommand extends Command
         $this
             ->setName('kaliop:batch:launch')
             ->setDescription('Batch command launcher')
-            ->addArgument('code', InputArgument::REQUIRED, 'Job code');
+            ->addArgument('code', InputArgument::REQUIRED, 'Job code')
+            ->addOption('config', null, InputOption::VALUE_REQUIRED, 'Job configuration parameters', '{}')
+        ;
     }
 
     /**
@@ -43,6 +46,7 @@ class BatchLauncherCommand extends Command
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $jobCode = $input->getArgument('code');
+        $config = $input->getOption('config');
         $stopExecution = false;
         $offset = 0;
 
@@ -53,7 +57,7 @@ class BatchLauncherCommand extends Command
         }
 
         while (!$stopExecution) {
-            $job = sprintf('php bin/console kaliop:batch:job %s --offset=%s', $jobCode, $offset);
+            $job = sprintf("php bin/console kaliop:batch:job %s --config='%s' --offset=%s", $jobCode, $config, $offset);
             $process = new Process($job);
             $process->setTimeout(500);
             $process->mustRun();

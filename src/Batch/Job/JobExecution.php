@@ -5,6 +5,7 @@ namespace Kaliop\BatchBundle\Batch\Job;
 
 
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
@@ -18,8 +19,8 @@ class JobExecution
     const STAT_FAILURES = 'failures';
     const STAT_FINISHED = 'finished';
 
-    /** @var array */
-    protected $config;
+    /** @var \Kaliop\BatchBundle\Batch\Job\JobParameters */
+    protected $jobParameters;
 
     /** @var array */
     protected $stats;
@@ -29,13 +30,13 @@ class JobExecution
 
     /**
      * JobExecution constructor.
-     * @param OutputInterface $output
-     * @param array $config
+     * @param OutputInterface                             $output
+     * @param \Kaliop\BatchBundle\Batch\Job\JobParameters $jobParameters
      */
-    public function __construct(OutputInterface $output, array $config)
+    public function __construct(OutputInterface $output, JobParameters $jobParameters)
     {
         $this->output = $output;
-        $this->config = $this->resolveConfiguration($config);
+        $this->jobParameters = $this->resolveConfiguration($jobParameters);
         $this->stats = [
             self::STAT_TOTAL => 0,
             self::STAT_SUCCESS => 0,
@@ -45,36 +46,9 @@ class JobExecution
         ];
     }
 
-    /**
-     * @return OutputInterface
-     */
-    public function getOutput() : OutputInterface
+    public function getJobParameters() : JobParameters
     {
-        return $this->output;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCode() : string
-    {
-        return $this->config['code'];
-    }
-
-    /**
-     * @return int
-     */
-    public function getOffset() : int
-    {
-        return $this->config['offset'];
-    }
-
-    /**
-     * @return int
-     */
-    public function getVerbosity() : int
-    {
-        return $this->config['verbosity'];
+        return $this->jobParameters;
     }
 
     /**
@@ -161,21 +135,35 @@ class JobExecution
     }
 
     /**
-     * @param array $config
-     * @return array
+     * @param \Kaliop\BatchBundle\Batch\Job\JobParameters $jobParameters
+     * @return \Kaliop\BatchBundle\Batch\Job\JobParameters
      */
-    private function resolveConfiguration(array $config)
+    private function resolveConfiguration(JobParameters $jobParameters) : JobParameters
     {
-        return (new OptionsResolver())
-            ->setRequired(['code', 'verbosity', 'offset'])
-            ->setAllowedTypes('code', 'string', 'int')
-            ->setAllowedValues('verbosity', [
-                OutputInterface::VERBOSITY_QUIET,
-                OutputInterface::VERBOSITY_NORMAL,
-                OutputInterface::VERBOSITY_VERBOSE,
-                OutputInterface::VERBOSITY_VERY_VERBOSE,
-                OutputInterface::VERBOSITY_DEBUG,
-            ])
-            ->resolve($config);
+        return new JobParameters(
+            (new OptionsResolver())
+                ->setRequired(['job_code', 'verbosity', 'offset'])
+                ->setDefaults([
+                    'options' => ''
+                ])
+                ->setAllowedTypes('job_code', 'string')
+                ->setAllowedTypes('verbosity', 'int')
+                ->setAllowedTypes('offset', 'string')
+                ->setAllowedTypes('options', 'string')
+                ->setAllowedValues('verbosity', [
+                    OutputInterface::VERBOSITY_QUIET,
+                    OutputInterface::VERBOSITY_NORMAL,
+                    OutputInterface::VERBOSITY_VERBOSE,
+                    OutputInterface::VERBOSITY_VERY_VERBOSE,
+                    OutputInterface::VERBOSITY_DEBUG,
+                ])
+                ->setNormalizer('offset', function(Options $options, $value) {
+                    return (int) $value;
+                })
+                ->setNormalizer('options', function(Options $options, $value) {
+                    return json_decode($value, true);
+                })
+                ->resolve($jobParameters->toArray())
+        );
     }
 }
