@@ -57,7 +57,7 @@ class BatchLauncherCommand extends Command
         }
 
         while (!$stopExecution) {
-            $job = sprintf("php bin/console kaliop:batch:job %s --config='%s' --offset=%s", $jobCode, $config, $offset);
+            $job = sprintf("%s bin/console kaliop:batch:job %s --config='%s' --offset=%s", PHP_BINARY, $jobCode, $config, $offset);
             $process = new Process($job);
             $process->setTimeout(500);
             $process->mustRun();
