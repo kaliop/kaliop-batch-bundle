@@ -3,13 +3,13 @@
 
 namespace Kaliop\BatchBundle\Command;
 
-
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Process\Process;
 
 /**
@@ -27,6 +27,18 @@ class BatchLauncherCommand extends Command
         self::PROGRESS_SUCCESS => 0,
         self::PROGRESS_ERRORS => 0,
     ];
+
+    private $consolePath;
+
+    /**
+     * BatchLauncherCommand constructor.
+     * @param KernelInterface $kernel
+     */
+    public function __construct(KernelInterface $kernel)
+    {
+        $this->consolePath = $kernel->getRootDir() . '/../bin/console';
+        parent::__construct();
+    }
 
     public function configure()
     {
@@ -52,12 +64,18 @@ class BatchLauncherCommand extends Command
 
         if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
             $progress = new ProgressBar($output);
-            $progress->setFormat('Items treated: %message% - Memory usage: %memory%');
+            $progress->setFormat('Info: %message% - Memory usage: %memory%');
             $progress->start();
         }
 
         while (!$stopExecution) {
-            $job = sprintf("%s bin/console kaliop:batch:job %s --config='%s' --offset=%s", PHP_BINARY, $jobCode, $config, $offset);
+            $job = sprintf("%s %s kaliop:batch:job %s --config='%s' --offset=%s",
+                PHP_BINARY,
+                $this->consolePath,
+                $jobCode,
+                $config,
+                $offset);
+
             $process = new Process($job);
             $process->setTimeout(500);
             $process->mustRun();

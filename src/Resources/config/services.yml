@@ -29,5 +29,9 @@ services:
     tags:
       - { name: 'console.command' }
 
+  Kaliop\BatchBundle\Command\BatchLauncherCommand:
+    tags:
+      - { name: 'console.command' }
+
   batch.entity_writer:
     class: 'Kaliop\BatchBundle\Batch\Writer\EntityWriter'
