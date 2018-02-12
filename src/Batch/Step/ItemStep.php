@@ -80,17 +80,18 @@ class ItemStep extends AbstractStep
                     continue;
                 }
                 $processedItem = $this->processor->process($readItem);
+                $writeCount++;
             } catch (\Exception $e) {
                 $this->handleException($e, $jobExecution);
                 $processedItem = null;
                 unset($processedItem);
+                $writeCount++;
                 continue;
             }
             if (null !== $processedItem) {
                 $itemsToWrite[] = $processedItem;
                 $processedItem = null;
                 unset($processedItem);
-                $writeCount++;
                 if ($this->isBatchSizeReached($writeCount)) {
                     try {
                         $this->writer->write($itemsToWrite);
