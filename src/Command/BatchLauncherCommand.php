@@ -10,6 +10,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Process\PhpExecutableFinder;
 use Symfony\Component\Process\Process;
 
 /**
@@ -29,14 +30,32 @@ class BatchLauncherCommand extends Command
     ];
 
     private $consolePath;
+    private $phpBinaryPath;
 
     /**
      * BatchLauncherCommand constructor.
      * @param KernelInterface $kernel
+     * @param string|null $phpBinaryPath
      */
-    public function __construct(KernelInterface $kernel)
+    public function __construct(KernelInterface $kernel, string $phpBinaryPath = null)
     {
         $this->consolePath = $kernel->getRootDir() . '/../bin/console';
+
+        if (!$phpBinaryPath) {
+            $phpBinaryFinder = new PhpExecutableFinder();
+            $phpBinaryPath = $phpBinaryFinder->find();
+        }
+
+        if (!$phpBinaryPath) {
+            throw new \InvalidArgumentException('
+                Can\'t find php binary file,
+                please provide it in bundle configuration,
+                php_binary_path: path,
+                provided path is: ' . $phpBinaryPath
+            );
+        }
+
+        $this->phpBinaryPath = $phpBinaryPath;
         parent::__construct();
     }
 
@@ -70,7 +89,7 @@ class BatchLauncherCommand extends Command
 
         while (!$stopExecution) {
             $job = sprintf("%s %s kaliop:batch:job %s --config='%s' --offset=%s",
-                PHP_BINARY,
+                $this->phpBinaryPath,
                 $this->consolePath,
                 $jobCode,
                 $config,

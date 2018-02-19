@@ -22,7 +22,10 @@ class Configuration implements ConfigurationInterface
     {
         $treeBuilder = new TreeBuilder();
         $treeBuilder
-            ->root('kaliop_batch')
+            ->root('batch')
+                ->children()
+                    ->scalarNode('php_binary_path')->end()
+                ->end()
             ->end();
 
         return $treeBuilder;
