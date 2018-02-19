@@ -37,6 +37,15 @@ class AppKernel extends Kernel
 }
 ```
 
+### configuration ###
+```php
+You can specify (optional) a php binary path as follow
+#in app/config/config.yml
+batch:
+    php_binary_path: my/binary/path
+```
+
+
 ## Usage
 
 ### List all available jobs
