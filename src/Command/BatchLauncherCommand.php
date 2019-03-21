@@ -22,7 +22,7 @@ class BatchLauncherCommand extends Command
     const PROGRESS_SUCCESS = 'success';
     const PROGRESS_ERRORS = 'errors';
 
-    /** @var array  */
+    /** @var array */
     private $progressData = [
         self::PROGRESS_TOTAL => 0,
         self::PROGRESS_SUCCESS => 0,
@@ -41,20 +41,6 @@ class BatchLauncherCommand extends Command
     {
         $this->consolePath = $kernel->getRootDir() . '/../bin/console';
 
-        if (!$phpBinaryPath) {
-            $phpBinaryFinder = new PhpExecutableFinder();
-            $phpBinaryPath = $phpBinaryFinder->find();
-        }
-
-        if (!$phpBinaryPath) {
-            throw new \InvalidArgumentException('
-                Can\'t find php binary file,
-                please provide it in bundle configuration,
-                php_binary_path: path,
-                provided path is: ' . $phpBinaryPath
-            );
-        }
-
         $this->phpBinaryPath = $phpBinaryPath;
         parent::__construct();
     }
@@ -65,8 +51,7 @@ class BatchLauncherCommand extends Command
             ->setName('kaliop:batch:launch')
             ->setDescription('Batch command launcher')
             ->addArgument('code', InputArgument::REQUIRED, 'Job code')
-            ->addOption('config', null, InputOption::VALUE_REQUIRED, 'Job configuration parameters', '{}')
-        ;
+            ->addOption('config', null, InputOption::VALUE_REQUIRED, 'Job configuration parameters', '{}');
     }
 
     /**
@@ -76,10 +61,12 @@ class BatchLauncherCommand extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->assertValidPhp();
         $jobCode = $input->getArgument('code');
         $config = $input->getOption('config');
         $stopExecution = false;
         $offset = 0;
+        $env = $input->getOption('env');
 
         if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERY_VERBOSE) {
             $progress = new ProgressBar($output);
@@ -88,12 +75,13 @@ class BatchLauncherCommand extends Command
         }
 
         while (!$stopExecution) {
-            $job = sprintf("%s %s kaliop:batch:job %s --config='%s' --offset=%s",
+            $job = sprintf("%s %s kaliop:batch:job %s --config='%s' --offset=%s --env='%s'",
                 $this->phpBinaryPath,
                 $this->consolePath,
                 $jobCode,
                 $config,
-                $offset);
+                $offset,
+                $env);
 
             $process = new Process($job);
             $process->setTimeout(500);
@@ -130,5 +118,26 @@ class BatchLauncherCommand extends Command
         );
         $progress->setMessage($message);
         $progress->advance();
+    }
+
+    /**
+     *
+     */
+    private function assertValidPhp()
+    {
+        $givenPath = $this->phpBinaryPath;
+        if (!$this->phpBinaryPath) {
+            $phpBinaryFinder = new PhpExecutableFinder();
+            $this->phpBinaryPath = $phpBinaryFinder->find();
+        }
+
+        if (!$this->phpBinaryPath) {
+            throw new \InvalidArgumentException('
+                Can\'t find php binary file,
+                please provide it in bundle configuration,
+                php_binary_path: path,
+                provided path is: ' . $givenPath
+            );
+        }
     }
 }
